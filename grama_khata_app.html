@@ -1,0 +1,379 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.app { max-width: 420px; margin: 0 auto; background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-xl); overflow: hidden; }
+.header { background: #1D9E75; padding: 16px 20px 12px; color: white; }
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.header h1 { font-size: 20px; font-weight: 500; color: white; }
+.shop-name { font-size: 13px; color: rgba(255,255,255,0.8); }
+.summary-row { display: flex; gap: 12px; margin-top: 12px; }
+.summary-card { flex: 1; background: rgba(255,255,255,0.15); border-radius: var(--border-radius-md); padding: 8px 12px; }
+.summary-card .label { font-size: 11px; color: rgba(255,255,255,0.75); margin-bottom: 2px; }
+.summary-card .value { font-size: 18px; font-weight: 500; color: white; }
+.nav-tabs { display: flex; border-bottom: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); }
+.nav-tab { flex: 1; padding: 10px 4px; text-align: center; font-size: 13px; color: var(--color-text-secondary); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+.nav-tab.active { color: #1D9E75; border-bottom-color: #1D9E75; font-weight: 500; }
+.panel { display: none; padding: 16px; }
+.panel.active { display: block; }
+.section-label { font-size: 12px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+.customer-list { display: flex; flex-direction: column; gap: 8px; }
+.customer-card { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); cursor: pointer; transition: background 0.15s; }
+.customer-card:hover { background: var(--color-background-secondary); }
+.avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 500; flex-shrink: 0; }
+.customer-info { flex: 1; min-width: 0; }
+.customer-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+.customer-meta { font-size: 12px; color: var(--color-text-secondary); }
+.amount-badge { font-size: 14px; font-weight: 500; padding: 4px 10px; border-radius: var(--border-radius-md); }
+.amount-owed { background: #FCEBEB; color: #A32D2D; }
+.amount-paid { background: #EAF3DE; color: #3B6D11; }
+.fab { position: relative; margin-top: 16px; }
+.fab button { width: 100%; padding: 12px; background: #1D9E75; color: white; border: none; border-radius: var(--border-radius-lg); font-size: 15px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.15s; }
+.fab button:hover { opacity: 0.9; }
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+.modal-bg.open { display: flex; }
+.modal { background: var(--color-background-primary); border-radius: var(--border-radius-xl); padding: 20px; width: 90%; max-width: 380px; }
+.modal h3 { font-size: 16px; font-weight: 500; margin-bottom: 16px; color: var(--color-text-primary); }
+.field { margin-bottom: 12px; }
+.field label { font-size: 12px; color: var(--color-text-secondary); display: block; margin-bottom: 4px; }
+.field input { width: 100%; }
+.btn-row { display: flex; gap: 8px; margin-top: 16px; }
+.btn-cancel { flex: 1; padding: 10px; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); cursor: pointer; font-size: 14px; color: var(--color-text-secondary); }
+.btn-save { flex: 2; padding: 10px; background: #1D9E75; color: white; border: none; border-radius: var(--border-radius-md); cursor: pointer; font-size: 14px; font-weight: 500; }
+.detail-panel { display: none; padding: 0; }
+.detail-panel.active { display: block; }
+.detail-header { padding: 16px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.back-btn { background: none; border: none; cursor: pointer; color: var(--color-text-secondary); font-size: 20px; padding: 0; }
+.detail-customer { font-size: 16px; font-weight: 500; color: var(--color-text-primary); }
+.detail-balance { padding: 16px 20px; display: flex; gap: 12px; }
+.bal-card { flex: 1; padding: 12px; border-radius: var(--border-radius-md); text-align: center; }
+.bal-card .bl { font-size: 11px; margin-bottom: 4px; }
+.bal-card .bv { font-size: 20px; font-weight: 500; }
+.bal-gave { background: #FCEBEB; }
+.bal-gave .bl { color: #A32D2D; }
+.bal-gave .bv { color: #A32D2D; }
+.bal-got { background: #EAF3DE; }
+.bal-got .bl { color: #3B6D11; }
+.bal-got .bv { color: #3B6D11; }
+.bal-net { background: #E6F1FB; }
+.bal-net .bl { color: #185FA5; }
+.bal-net .bv { color: #185FA5; }
+.txn-action-row { display: flex; gap: 8px; padding: 0 16px 16px; }
+.btn-give { flex: 1; padding: 10px; background: #FCEBEB; color: #A32D2D; border: none; border-radius: var(--border-radius-md); cursor: pointer; font-size: 14px; font-weight: 500; }
+.btn-take { flex: 1; padding: 10px; background: #EAF3DE; color: #3B6D11; border: none; border-radius: var(--border-radius-md); cursor: pointer; font-size: 14px; font-weight: 500; }
+.btn-whatsapp { width: calc(100% - 32px); margin: 0 16px 16px; padding: 10px; background: #25D366; color: white; border: none; border-radius: var(--border-radius-md); cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.txn-log { padding: 0 16px; }
+.txn-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.txn-dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 10px; flex-shrink: 0; }
+.txn-desc { flex: 1; font-size: 13px; color: var(--color-text-secondary); }
+.txn-date { font-size: 11px; color: var(--color-text-secondary); margin-right: 10px; }
+.txn-amt { font-size: 14px; font-weight: 500; }
+.txn-amt.give { color: #A32D2D; }
+.txn-amt.take { color: #3B6D11; }
+.report-section { padding: 16px; }
+.report-card { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 14px 16px; margin-bottom: 12px; }
+.report-title { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 8px; }
+.report-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 14px; }
+.report-row .rn { color: var(--color-text-primary); }
+.report-row .rv { font-weight: 500; }
+.report-row .rv.red { color: #A32D2D; }
+.report-row .rv.green { color: #3B6D11; }
+.copy-btn { width: 100%; margin-top: 8px; padding: 10px; background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); cursor: pointer; font-size: 14px; color: var(--color-text-secondary); }
+</style>
+
+<h2 class="sr-only">Grama-Khata: digital micro-finance ledger for village shopkeepers</h2>
+
+<div class="app" id="app">
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="shop-name"><i class="ti ti-building-store" aria-hidden="true"></i> Ravi Stores, Hoskote</div>
+        <h1>Grama-Khata</h1>
+      </div>
+      <i class="ti ti-notebook" style="font-size:28px; color:rgba(255,255,255,0.7)" aria-hidden="true"></i>
+    </div>
+    <div class="summary-row">
+      <div class="summary-card">
+        <div class="label">Total credit given</div>
+        <div class="value" id="total-given">₹0</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">Total collected</div>
+        <div class="value" id="total-collected">₹0</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">Net due</div>
+        <div class="value" id="net-due">₹0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="switchTab('customers')"><i class="ti ti-users" aria-hidden="true"></i> Customers</div>
+    <div class="nav-tab" onclick="switchTab('report')"><i class="ti ti-chart-bar" aria-hidden="true"></i> Report</div>
+  </div>
+
+  <div class="panel active" id="panel-customers">
+    <div class="section-label">Due accounts</div>
+    <div class="customer-list" id="customer-list"></div>
+    <div class="fab">
+      <button onclick="openAddCustomer()"><i class="ti ti-plus" aria-hidden="true"></i> Add customer</button>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-report">
+    <div class="report-section">
+      <div class="report-card">
+        <div class="report-title">Daily collection report — <span id="report-date"></span></div>
+        <div id="report-rows"></div>
+      </div>
+      <button class="copy-btn" onclick="copyReport()"><i class="ti ti-copy" aria-hidden="true"></i> Copy as text</button>
+    </div>
+  </div>
+
+  <div class="detail-panel" id="detail-panel">
+    <div class="detail-header">
+      <button class="back-btn" onclick="closeDetail()"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+      <div>
+        <div class="detail-customer" id="detail-name"></div>
+        <div style="font-size:12px; color:var(--color-text-secondary)" id="detail-phone"></div>
+      </div>
+    </div>
+    <div class="detail-balance">
+      <div class="bal-card bal-gave">
+        <div class="bl">Given (Koduvudu)</div>
+        <div class="bv" id="d-given">₹0</div>
+      </div>
+      <div class="bal-card bal-got">
+        <div class="bl">Collected</div>
+        <div class="bv" id="d-got">₹0</div>
+      </div>
+      <div class="bal-card bal-net">
+        <div class="bl">Net due</div>
+        <div class="bv" id="d-net">₹0</div>
+      </div>
+    </div>
+    <div class="txn-action-row">
+      <button class="btn-give" onclick="openTxn('give')"><i class="ti ti-arrow-up-right" aria-hidden="true"></i> Give credit</button>
+      <button class="btn-take" onclick="openTxn('take')"><i class="ti ti-arrow-down-left" aria-hidden="true"></i> Collect payment</button>
+    </div>
+    <button class="btn-whatsapp" onclick="sendWhatsApp()"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i> Send reminder on WhatsApp</button>
+    <div class="txn-log">
+      <div class="section-label">Transaction log</div>
+      <div id="txn-list"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-add">
+  <div class="modal">
+    <h3>Add customer</h3>
+    <div class="field"><label>Name</label><input type="text" id="inp-name" placeholder="Customer name" /></div>
+    <div class="field"><label>Phone number</label><input type="tel" id="inp-phone" placeholder="10-digit mobile" /></div>
+    <div class="btn-row">
+      <button class="btn-cancel" onclick="closeModal('modal-add')">Cancel</button>
+      <button class="btn-save" onclick="saveCustomer()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-txn">
+  <div class="modal">
+    <h3 id="txn-title">Add transaction</h3>
+    <div class="field"><label>Amount (₹)</label><input type="number" id="inp-amount" placeholder="0" min="1" /></div>
+    <div class="field"><label>Note (optional)</label><input type="text" id="inp-note" placeholder="e.g. rice, dal..." /></div>
+    <div class="btn-row">
+      <button class="btn-cancel" onclick="closeModal('modal-txn')">Cancel</button>
+      <button class="btn-save" id="txn-save-btn" onclick="saveTxn()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const COLORS = ['#0F6E56','#185FA5','#993C1D','#993556','#3B6D11','#854F0B','#A32D2D'];
+let state = {
+  customers: [
+    { id: 1, name: 'Manjunath Reddy', phone: '9876543210', transactions: [
+      { type: 'give', amount: 450, note: 'rice & dal', date: '10 May' },
+      { type: 'give', amount: 200, note: 'oil', date: '11 May' },
+      { type: 'take', amount: 300, note: '', date: '12 May' }
+    ]},
+    { id: 2, name: 'Savitha Kumari', phone: '9845012345', transactions: [
+      { type: 'give', amount: 850, note: 'grocery', date: '08 May' },
+      { type: 'take', amount: 200, note: '', date: '09 May' }
+    ]},
+    { id: 3, name: 'Ramesh Naik', phone: '8765432109', transactions: [
+      { type: 'give', amount: 320, note: 'atta flour', date: '12 May' }
+    ]}
+  ],
+  activeId: null,
+  txnMode: 'give'
+};
+let nextId = 4;
+
+function initials(name) {
+  return name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+}
+function avatarColor(idx) { return COLORS[idx % COLORS.length]; }
+
+function calcBalance(txns) {
+  let given = 0, got = 0;
+  txns.forEach(t => { if (t.type === 'give') given += t.amount; else got += t.amount; });
+  return { given, got, net: given - got };
+}
+
+function totalStats() {
+  let tg = 0, tc = 0;
+  state.customers.forEach(c => { const b = calcBalance(c.transactions); tg += b.given; tc += b.got; });
+  document.getElementById('total-given').textContent = '₹' + tg.toLocaleString('en-IN');
+  document.getElementById('total-collected').textContent = '₹' + tc.toLocaleString('en-IN');
+  document.getElementById('net-due').textContent = '₹' + (tg - tc).toLocaleString('en-IN');
+}
+
+function renderList() {
+  totalStats();
+  const list = document.getElementById('customer-list');
+  const sorted = [...state.customers].sort((a,b) => {
+    return calcBalance(b.transactions).net - calcBalance(a.transactions).net;
+  });
+  list.innerHTML = sorted.map((c, i) => {
+    const b = calcBalance(c.transactions);
+    const cls = b.net > 0 ? 'amount-owed' : 'amount-paid';
+    const prefix = b.net > 0 ? '-₹' : '+₹';
+    return `<div class="customer-card" onclick="openDetail(${c.id})">
+      <div class="avatar" style="background:${avatarColor(i)}20; color:${avatarColor(i)}">${initials(c.name)}</div>
+      <div class="customer-info">
+        <div class="customer-name">${c.name}</div>
+        <div class="customer-meta">${c.transactions.length} transactions · ${c.phone}</div>
+      </div>
+      <span class="amount-badge ${cls}">${prefix}${Math.abs(b.net).toLocaleString('en-IN')}</span>
+    </div>`;
+  }).join('');
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  const tabs = document.querySelectorAll('.nav-tab');
+  if (tab === 'customers') { tabs[0].classList.add('active'); document.getElementById('panel-customers').classList.add('active'); }
+  else { tabs[1].classList.add('active'); document.getElementById('panel-report').classList.add('active'); renderReport(); }
+}
+
+function openDetail(id) {
+  state.activeId = id;
+  const c = state.customers.find(x => x.id === id);
+  document.getElementById('detail-name').textContent = c.name;
+  document.getElementById('detail-phone').textContent = c.phone;
+  refreshDetail();
+  document.getElementById('panel-customers').classList.remove('active');
+  document.getElementById('panel-report').classList.remove('active');
+  document.getElementById('detail-panel').classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+}
+
+function refreshDetail() {
+  const c = state.customers.find(x => x.id === state.activeId);
+  const b = calcBalance(c.transactions);
+  document.getElementById('d-given').textContent = '₹' + b.given.toLocaleString('en-IN');
+  document.getElementById('d-got').textContent = '₹' + b.got.toLocaleString('en-IN');
+  document.getElementById('d-net').textContent = '₹' + b.net.toLocaleString('en-IN');
+  const txnList = document.getElementById('txn-list');
+  txnList.innerHTML = [...c.transactions].reverse().map(t => {
+    const isGive = t.type === 'give';
+    return `<div class="txn-item">
+      <div class="txn-dot" style="background:${isGive ? '#A32D2D' : '#3B6D11'}"></div>
+      <div class="txn-desc">${t.note || (isGive ? 'Credit given' : 'Payment received')}</div>
+      <div class="txn-date">${t.date}</div>
+      <div class="txn-amt ${isGive ? 'give' : 'take'}">${isGive ? '-' : '+'}₹${t.amount.toLocaleString('en-IN')}</div>
+    </div>`;
+  }).join('');
+}
+
+function closeDetail() {
+  document.getElementById('detail-panel').classList.remove('active');
+  document.getElementById('panel-customers').classList.add('active');
+  document.querySelectorAll('.nav-tab')[0].classList.add('active');
+  renderList();
+}
+
+function openAddCustomer() {
+  document.getElementById('inp-name').value = '';
+  document.getElementById('inp-phone').value = '';
+  document.getElementById('modal-add').classList.add('open');
+}
+
+function saveCustomer() {
+  const name = document.getElementById('inp-name').value.trim();
+  const phone = document.getElementById('inp-phone').value.trim();
+  if (!name) return;
+  state.customers.push({ id: nextId++, name, phone, transactions: [] });
+  closeModal('modal-add');
+  renderList();
+}
+
+function openTxn(mode) {
+  state.txnMode = mode;
+  document.getElementById('txn-title').textContent = mode === 'give' ? 'Give credit (Koduvudu)' : 'Collect payment (Tegedukolluvudu)';
+  document.getElementById('txn-save-btn').style.background = mode === 'give' ? '#A32D2D' : '#1D9E75';
+  document.getElementById('inp-amount').value = '';
+  document.getElementById('inp-note').value = '';
+  document.getElementById('modal-txn').classList.add('open');
+}
+
+function saveTxn() {
+  const amt = parseInt(document.getElementById('inp-amount').value);
+  const note = document.getElementById('inp-note').value.trim();
+  if (!amt || amt <= 0) return;
+  const c = state.customers.find(x => x.id === state.activeId);
+  const today = new Date().toLocaleDateString('en-IN', {day:'numeric', month:'short'});
+  c.transactions.push({ type: state.txnMode, amount: amt, note, date: today });
+  closeModal('modal-txn');
+  refreshDetail();
+  totalStats();
+}
+
+function sendWhatsApp() {
+  const c = state.customers.find(x => x.id === state.activeId);
+  const b = calcBalance(c.transactions);
+  const msg = encodeURIComponent(`Namaskara ${c.name} avare, nimage Ravi Stores nalli ₹${b.net.toLocaleString('en-IN')} baaqi ide. Dayavittu payment madabeku. Dhanyavaadagalu!`);
+  window.open(`https://wa.me/91${c.phone}?text=${msg}`, '_blank');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function renderReport() {
+  const today = new Date().toLocaleDateString('en-IN', {day:'numeric', month:'long', year:'numeric'});
+  document.getElementById('report-date').textContent = today;
+  const rows = document.getElementById('report-rows');
+  const due = state.customers.filter(c => calcBalance(c.transactions).net > 0)
+    .sort((a,b) => calcBalance(b.transactions).net - calcBalance(a.transactions).net);
+  rows.innerHTML = due.map(c => {
+    const b = calcBalance(c.transactions);
+    return `<div class="report-row">
+      <span class="rn">${c.name}</span>
+      <span class="rv red">₹${b.net.toLocaleString('en-IN')}</span>
+    </div>`;
+  }).join('');
+  const total = due.reduce((s,c) => s + calcBalance(c.transactions).net, 0);
+  rows.innerHTML += `<div class="report-row" style="border-top:0.5px solid var(--color-border-tertiary); margin-top:8px; padding-top:8px">
+    <span class="rn" style="font-weight:500">Total outstanding</span>
+    <span class="rv red" style="font-size:16px">₹${total.toLocaleString('en-IN')}</span>
+  </div>`;
+}
+
+function copyReport() {
+  const today = new Date().toLocaleDateString('en-IN', {day:'numeric', month:'long'});
+  let txt = `Daily Collection Report — ${today}\nRavi Stores, Hoskote\n${'─'.repeat(30)}\n`;
+  state.customers.filter(c => calcBalance(c.transactions).net > 0)
+    .sort((a,b) => calcBalance(b.transactions).net - calcBalance(a.transactions).net)
+    .forEach(c => {
+      const b = calcBalance(c.transactions);
+      txt += `${c.name}: ₹${b.net.toLocaleString('en-IN')}\n`;
+    });
+  const total = state.customers.reduce((s,c) => s + calcBalance(c.transactions).net, 0);
+  txt += `${'─'.repeat(30)}\nTotal outstanding: ₹${total.toLocaleString('en-IN')}`;
+  navigator.clipboard.writeText(txt).then(() => { const b = document.querySelector('.copy-btn'); b.textContent = '✓ Copied!'; setTimeout(() => b.innerHTML = '<i class="ti ti-copy"></i> Copy as text', 2000); });
+}
+
+renderList();
+</script>
